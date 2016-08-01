@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-Built-By: Lambert Rosique
-Class-Path: mockito-all-1.9.5.jar
-Build-Jdk: 1.8.0_101
-Created-By: Maven Integration for Eclipse
-Main-Class: com.demo.minesweeper.App
-
