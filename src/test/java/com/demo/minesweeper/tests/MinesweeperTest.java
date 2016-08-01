@@ -10,12 +10,19 @@ import com.demo.minesweeper.service.Minesweeper;
 
 import junit.framework.TestCase;
 
+/**
+ * Test of all methods in Minesweeper
+ * The objective is to test the app functionally (and as a result per method)
+ * @author lrosique
+ *
+ */
 public class MinesweeperTest extends TestCase {
     
     private ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private Minesweeper minesweeper = new Minesweeper();
 
     public void setUp() {
+        outContent = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outContent));
     }
 
@@ -28,11 +35,6 @@ public class MinesweeperTest extends TestCase {
         Minesweeper minesweeper = new Minesweeper();
         assertNotNull(minesweeper);
     }
-    
-//    public void testInitGame() {
-//        fail("Not yet implemented");
-//    }
-//
     
     public void testGetBoardSize() {
         //Given data is correct
@@ -157,28 +159,193 @@ public class MinesweeperTest extends TestCase {
         assertTrue(Arrays.deepEquals(board.getSolution(),withSecondMine));
     }
 
-//    public void testPlayGame() {
-//        fail("Not yet implemented");
-//    }
-//
-//    public void testUnveilCeil() {
-//        fail("Not yet implemented");
-//    }
-//
-//    public void testUnveilAroundCells() {
-//        fail("Not yet implemented");
-//    }
-//
-//    public void testDisplayBoardBoardBoolean() {
-//        fail("Not yet implemented");
-//    }
-//
-//    public void testDisplayBoardBoard() {
-//        fail("Not yet implemented");
-//    }
-//
-//    public void testDisplayPresentation() {
-//        fail("Not yet implemented");
-//    }
+    public void testUnveilCeil() {
+        int width = 4;
+        int height = 3;
+        Board board = new Board(width, height);
+        int[][] solution =       {{-1, 1, 0},
+                                  { 2, 2, 1},
+                                  { 1,-1, 1},
+                                  { 1, 1, 1}};
+        //No cell is unveiled
+        boolean[][] boardGame ={{false, false, false},
+                                {false, false, false},
+                                {false, false, false},
+                                {false, false, false}};
+        board.setSolution(solution);
+        board.setBoardGame(boardGame);
+        //Given data is correct
+        String data = "1 0";
+        System.setIn(new ByteArrayInputStream(data.getBytes()));
+        System.setOut(new PrintStream(outContent));
+        minesweeper.unveilCeil(board, System.in, System.out);
+        boolean[][] expectedBoard ={{false, false, false},
+                                    {true, false, false},
+                                    {false, false, false},
+                                    {false, false, false}};
+        String expectedOutput = "Which cell do you want to unveil (give x y separated by one space) ?\r\n";
+        assertNotNull(board.getBoardGame());
+        assertTrue(Arrays.deepEquals(board.getBoardGame(),expectedBoard));
+        assertEquals(expectedOutput,outContent.toString());
+        
+        //Given data is incorrect :
+        //null, only one number, number is negative, number is over int, chars instead of int, wrong separator, already unveiled, out of board width, out of board height, success
+        data = "\n"+"1\n"+"-1 2\n"+"2 -1\n"+"2147483648 3\n"+"a 4\n"+"1  5\n"+"1 0\n"+"100 1\n"+"1 100\n"+"2 2";
+        outContent = new ByteArrayOutputStream();
+        System.setIn(new ByteArrayInputStream(data.getBytes()));
+        System.setOut(new PrintStream(outContent));
+        minesweeper.unveilCeil(board, System.in, System.out);
+        boolean[][] expectedBoardWithTwoUnveil ={{false, false, false},
+                                                {  true, false, false},
+                                                { false, false, true},
+                                                { false, false, false}};
+        expectedOutput = "Which cell do you want to unveil (give x y separated by one space) ?\r\n"+
+                            "These are not two numbers, try again\r\n"+
+                            "These are not two numbers, try again\r\n"+
+                            "These are not two numbers, try again\r\n"+
+                            "These are not two numbers, try again\r\n"+
+                            "Number too long, try again\r\n"+
+                            "These are not two numbers, try again\r\n"+
+                            "These are not two numbers, try again\r\n"+
+                            "Cell already unveiled, choose an other one\r\n"+
+                            "Cell out of the board ! Try again please\r\n"+
+                            "Cell out of the board ! Try again please\r\n";
 
+        assertNotNull(board.getBoardGame());
+        assertTrue(Arrays.deepEquals(board.getBoardGame(),expectedBoardWithTwoUnveil));
+        assertEquals(expectedOutput,outContent.toString());
+    }
+
+    public void testUnveilAroundCells() {
+        int width = 4;
+        int height = 3;
+        Board board = new Board(width, height);
+        int[][] solution =       {{-1, 1, 0},
+                                  { 1, 2, 1},
+                                  { 0, 1,-1},
+                                  { 0, 1, 1}};
+        //No cell is unveiled
+        boolean[][] boardGame ={{false, false, false},
+                                {false, false, false},
+                                {false, false, false},
+                                {false, false, false}};
+        board.setSolution(solution);
+        board.setBoardGame(boardGame);
+        minesweeper.unveilAroundCells(0, 2, board);
+        boolean[][] expectedUnveilFirst ={{false, true , true},
+                                          {false, true , true},
+                                          {false, false, false},
+                                          {false, false, false}};
+        assertNotNull(board.getBoardGame());
+        assertTrue(Arrays.deepEquals(board.getBoardGame(),expectedUnveilFirst));
+        minesweeper.unveilAroundCells(3, 0, board);
+        boolean[][] expectedUnveilWithPropagation ={{false, true , true},
+                                                    {true, true , true},
+                                                    {true, true, false},
+                                                    {true, true, false}};
+        assertTrue(Arrays.deepEquals(board.getBoardGame(),expectedUnveilWithPropagation));
+    }
+
+    public void testDisplayBoard() {
+        int width = 4;
+        int height = 3;
+        Board board = new Board(width, height);
+        int[][] solution =       {{-1, 1, 0},
+                                  { 2, 2, 1},
+                                  { 1,-1, 1},
+                                  { 1, 1, 1}};
+        //Only first line will be unveiled and last cell
+        boolean[][] boardGame ={{true,  true,  true},
+                                {false, false, false},
+                                {false, false, false},
+                                {false, false, true}};
+        board.setSolution(solution);
+        board.setBoardGame(boardGame);
+        System.setOut(new PrintStream(outContent));
+        minesweeper.displayBoard(board, System.out);
+        String expectedOutput = "[ -1  1  0 ]\r\n"+
+                                "[  *  *  * ]\r\n"+
+                                "[  *  *  * ]\r\n"+
+                                "[  *  *  1 ]\r\n";
+        assertEquals(expectedOutput, outContent.toString());
+        
+        //Display solution
+        outContent = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outContent));
+        minesweeper.displayBoard(board, true, System.out);
+        String expectedFullSolution = "[ -1  1  0 ]\r\n"+
+                                      "[  2  2  1 ]\r\n"+
+                                      "[  1 -1  1 ]\r\n"+
+                                      "[  1  1  1 ]\r\n";
+        assertEquals(expectedFullSolution, outContent.toString());
+    }
+
+    public void testDisplayPresentation() {
+        System.setOut(new PrintStream(outContent));
+        String expectedOutput = "*****\r\n"+
+                                "Welcome to the greatest Minesweeper !\r\n"+
+                                "Rules are simple : unveil all cells that are not mines\r\n"+
+                                "Good luck !\r\n"+
+                                "*****\r\n";
+        minesweeper.displayPresentation(System.out);
+        assertEquals(expectedOutput, outContent.toString());
+    }
+
+    //These two methods are calling back the other methods to construct the app
+    
+    //TODO : crash with out of memory error due to sys out
+//  public void testInitGame() {
+//      //We verify that the board is initiated, coherence of data is tested in each method
+//      int mines = 3;
+//      int width = 4;
+//      int height = 5;
+//      String data = width+" "+height+"\n"+mines+"\n";
+//      System.setIn(new ByteArrayInputStream(data.getBytes()));
+//      outContent = new ByteArrayOutputStream();
+//      System.setOut(new PrintStream(outContent));
+//      Board board = minesweeper.initGame(System.in, System.out);
+//      assertNotNull(board);
+//      assertEquals(board.getWidth(),width);
+//      assertEquals(board.getHeight(),height);
+//      assertEquals(board.getNumberOfMines(),mines);
+//  }
+  
+  //TODO : crash with out of memory error due to sys out
+//  public void testPlayGame() {
+//      int width = 4;
+//      int height= 3;
+//      int mines = 2;
+//      Board board = new Board(width, height);
+//      int[][] solution =       {{-1, 1, 0},
+//                                { 2, 2, 1},
+//                                { 1,-1, 1},
+//                                { 1, 1, 1}};
+//      board.setNumberOfMines(mines);
+//      boolean[][] boardGame ={{false, false, false},
+//                              {false, false, false},
+//                              {false, false, false},
+//                              {false, false, false}};
+//      board.setSolution(solution);
+//      board.setBoardGame(boardGame);
+//      System.setOut(new PrintStream(outContent));
+//      
+//      //Loose at second turn
+//      String data = "1 0\n0 0";
+//      System.setIn(new ByteArrayInputStream(data.getBytes()));
+//      
+//      minesweeper.playGame(board, System.in, System.out);
+//      String expectedResultLoose = "";
+//      assertEquals(expectedResultLoose, outContent.toString());
+//      
+//      //Win the game
+//      board.setBoardGame(new boolean[4][3]);
+//      data = "0 2\n1 0\n2 0\n3 0\n2 2\n3 1\n3 2";
+//      outContent = new ByteArrayOutputStream();
+//      System.setIn(new ByteArrayInputStream(data.getBytes()));
+//      System.setOut(new PrintStream(outContent));
+//      
+//      minesweeper.playGame(board, System.in, System.out);
+//      String expectedResultWin = "";
+//      assertEquals(expectedResultWin, outContent.toString());
+//  }
 }
