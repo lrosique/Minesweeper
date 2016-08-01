@@ -146,8 +146,8 @@ public class Minesweeper {
             y = rand.nextInt(board.getHeight());
             // -1 is for mines so we check on the position if this is not
             // already one
-            if (board.getSolution()[x][y] != -1) {
-                board.getSolution()[x][y] = -1;
+            if (board.getSolution()[y][x] != -1) {
+                board.getSolution()[y][x] = -1;
                 count++;
                 // Then we increment all cells around (except for mines)
                 // which is faster than incrementing after having generated all
@@ -176,8 +176,8 @@ public class Minesweeper {
 
         for (int i = left; i <= right; i++) {
             for (int j = top; j <= bottom; j++) {
-                if (board.getSolution()[i][j] != -1) {
-                    board.getSolution()[i][j]++;
+                if (board.getSolution()[j][i] != -1) {
+                    board.getSolution()[j][i]++;
                 }
             }
         }
@@ -234,7 +234,7 @@ public class Minesweeper {
                     y = Integer.parseInt(numbers[1]);
                     if (x < 0 || x >= board.getWidth() || y < 0 || y >= board.getHeight()) {
                         out.println(CommonConstants.ERR_OUT_OF_BOARD);
-                    } else if (board.getBoardGame()[x][y]) {
+                    } else if (board.getBoardGame()[y][x]) {
                         out.println(CommonConstants.ERR_ALREADY_UNVEILED);
                     } else {
                         twoNumbersEntered = true;
@@ -254,15 +254,15 @@ public class Minesweeper {
         } while (!twoNumbersEntered);
 
         // Check if not mine
-        if (board.getSolution()[x][y] == -1) {
+        if (board.getSolution()[y][x] == -1) {
             mineIsDiscovered = true;
             // Unveil cell for result
-            board.getBoardGame()[x][y] = true;
-        } else if (board.getSolution()[x][y] == 0) {
+            board.getBoardGame()[y][x] = true;
+        } else if (board.getSolution()[y][x] == 0) {
             // Display around cells
             unveilAroundCells(x, y, board);
         } else {
-            board.getBoardGame()[x][y] = true;
+            board.getBoardGame()[y][x] = true;
             board.setRemainingCells(board.getRemainingCells() - 1);
         }
 
@@ -289,10 +289,10 @@ public class Minesweeper {
 
         for (int i = left; i <= right; i++) {
             for (int j = top; j <= bottom; j++) {
-                if (!board.getBoardGame()[i][j]) {
-                    board.getBoardGame()[i][j] = true;
+                if (!board.getBoardGame()[j][i]) {
+                    board.getBoardGame()[j][i] = true;
                     board.setRemainingCells(board.getRemainingCells() - 1);
-                    if (board.getSolution()[i][j] == 0) {
+                    if (board.getSolution()[j][i] == 0) {
                         unveilAroundCells(i, j, board);
                     }
                 }
@@ -317,13 +317,13 @@ public class Minesweeper {
         for (int i = 0; i < board.getWidth(); i++) {
             line.append(CommonConstants.LEFT_BRACKET);
             for (int j = 0; j < board.getHeight(); j++) {
-                if (board.getBoardGame()[i][j] || showSolution) {
+                if (board.getBoardGame()[j][i] || showSolution) {
                     // Cell is unveiled
-                    if (board.getSolution()[i][j] != -1) {
+                    if (board.getSolution()[j][i] != -1) {
                         // If not mine, we add two spaces to align perfectly
                         line.append(CommonConstants.WHITESPACE);
                     }
-                    line.append(CommonConstants.WHITESPACE + board.getSolution()[i][j]);
+                    line.append(CommonConstants.WHITESPACE + board.getSolution()[j][i]);
                 } else {
                     // Cell is hidden
                     line.append(CommonConstants.WHITESPACE + CommonConstants.WHITESPACE + CommonConstants.STAR);

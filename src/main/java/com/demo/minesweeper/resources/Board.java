@@ -23,9 +23,9 @@ public class Board {
         this.width = width;
         this.height = height;
         this.numberOfCells = width * height;
-        this.solution = new int[width][height];
+        this.solution = new int[height][width];
         this.numberOfMines = 0;
-        this.boardGame = new boolean[width][height];
+        this.boardGame = new boolean[height][width];
         this.remainingCells = this.numberOfCells;
     }
 
