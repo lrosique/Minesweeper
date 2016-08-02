@@ -314,9 +314,9 @@ public class Minesweeper {
      */
     public void displayBoard(Board board, boolean showSolution,PrintStream out) {
         StringBuilder line = new StringBuilder();
-        for (int i = 0; i < board.getWidth(); i++) {
+        for (int j = 0; j < board.getHeight(); j++) {
             line.append(CommonConstants.LEFT_BRACKET);
-            for (int j = 0; j < board.getHeight(); j++) {
+                for (int i = 0; i < board.getWidth(); i++) {
                 if (board.getBoardGame()[j][i] || showSolution) {
                     // Cell is unveiled
                     if (board.getSolution()[j][i] != -1) {
